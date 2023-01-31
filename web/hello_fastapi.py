@@ -17,8 +17,8 @@ async def read_item(item_id: int, q: str | None = None):
 #:
 
 @app.get("/soma/{x}/{y}")
-async def sum(x: int, y: int):
-    return {"x + y": x + y}
+async def sum(x: int, y: int) -> dict:
+    return {"total": x + y}
 #:
 
 # Por omissão FastAPI gera JSON
