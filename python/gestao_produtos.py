@@ -59,9 +59,24 @@ class Produto:
         self.preco = preco
     #:
 
-    def __str__(self):
+    @property # criando atributo computado
+    def get_desc_tipo(self) -> str:
+        return PRODUCT_TYPES[self.tipo]
+    #:
+
+    def __str__(self) -> str:
         cls_name = self.__class__.__name__
         return f'{cls_name}[id_= {self.id}  nome = "{self.nome}" tipo = "{self.tipo}"]'
+    #:
+
+    def __repr__(self) -> str:
+        cls_name = self.__class__.__name__
+        return (f'{cls_name}(id_ = {self.id} nome = {self.nome} tipo={self.tipo} '
+                f'quantidade = {self.quantidade} preço = {repr(self.preco)}')
+    #:
+
+    def com_iva(self, taxa_iva: dec) -> dec:
+        return self.preco * (1 + taxa_iva / 100)
     #:
 #:
 
@@ -69,12 +84,52 @@ class InvalidProdAttribute(ValueError):
     pass
 #:
 
-def main() -> None:
-    prod1 = Produto(30987, 'pão de milho', 'AL', 2, dec('1'))
-    # prod2 = Produto(356, 'AJAX')
+class CatalogoProdutos:
+    def __init__(self):
+        self._prods = {}
+    #:
 
-    print(f"prod1 {prod1.nome}")    # console.log(`prod1 ${prod1.nome}`)
-    # print(f"prod2 {prod2.nome}")
+    def append(self, prod: Produto) -> None:
+        if prod.id in self._prods:
+            raise DuplicateValue(f'Produt com id {prod.id} já existente.')
+        self._prods[prod.id] = prod;
+    #:
+
+    def _dump(self):
+        for prod in self._prods.values():
+            print(prod)
+        #:
+    #:
+
+    def get_by_id(self, id: int) -> Produto | None:
+        return self._prods.get(id)
+    #:
+
+    def pesquisa(self, criterio):
+        encontrados = CatalogoProdutos()
+        for prod in self._prods.values():
+            if criterio(prod):
+                encontrados.append(prod)
+        return encontrados
+    #:
+
+    def __len__(self):
+        return len(self._prods)
+    #:
+#:
+
+class DuplicateValue(Exception):
+    pass
+#:
+
+def main() -> None:
+    produtos = CatalogoProdutos()
+    produtos.append(Produto(30987, 'pão de milho', 'AL', 2, dec('1')))
+    produtos.append(Produto(30098,'leite mimosa','AL',10,dec('2')))
+    produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
+    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
+
+    produtos._dump()
 #:
 
 if __name__ == '__main__':
