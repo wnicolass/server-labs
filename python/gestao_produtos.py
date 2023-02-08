@@ -141,6 +141,8 @@ def main() -> None:
     # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
 
     produtos._dump()
+
+    # produtos.pesquisa(lambda prod: prod.tipo == 'AL')._dump()
 #:
 
 if __name__ == '__main__':
