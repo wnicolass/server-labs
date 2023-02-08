@@ -105,12 +105,23 @@ class CatalogoProdutos:
         return self._prods.get(id)
     #:
 
-    def pesquisa(self, criterio):
+    def pesquisa(self, criterio) -> 'CatalogoProdutos':
         encontrados = CatalogoProdutos()
         for prod in self._prods.values():
             if criterio(prod):
                 encontrados.append(prod)
         return encontrados
+    #:
+
+    def __str__(self):
+        class_name = self.__class__.__name__
+        return f'{class_name}[#produtos = {len(self._prods)}]'
+    #:
+
+    def __iter__(self):
+        for prod in self._prods.values():
+            yield prod
+        #:
     #:
 
     def __len__(self):
