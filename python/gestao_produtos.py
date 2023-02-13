@@ -136,6 +136,20 @@ class CatalogoProdutos:
         return encontrados
     #:
 
+    def remove_por_id(self, id: int) -> Produto | None:
+        prod = self._prods.get(id)
+        if prod:
+            del self._prods[id]
+        return prod
+    #:
+
+    def remove(self, criterio) -> 'CatalogoProdutos':
+        a_remover = self.pesquisa(criterio)
+        for prod in a_remover:
+            del self._prods[prod.id]
+        return a_remover
+    #:
+
     def __str__(self):
         class_name = self.__class__.__name__
         return f'{class_name}[#produtos = {len(self._prods)}]'
@@ -178,17 +192,89 @@ def linhas_relevantes(file: TextIO):
         yield line
 
 
-def main() -> None:
-    # produtos = CatalogoProdutos()
-    # produtos.append(Produto(30987, 'pão de milho', 'AL', 2, dec('1')))
-    # produtos.append(Produto(30098,'leite mimosa','AL',10,dec('2')))
-    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
-    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
-    # produtos.pesquisa(lambda prod: prod.tipo == 'AL')._dump()
-    
-    produtos = le_produtos('produtos.csv')
-    produtos._dump()
+################################################################################
+##
+##       MENU, OPÇÕES E INTERAÇÃO COM O UTILIZADOR
+##
+################################################################################
 
+def exibe_msg(*args, indent = DEFAULT_INDENTATION, **kargs):
+    print(' ' * (indent - 1), *args, **kargs)
+#:
+
+def cls():
+    if sys.platform == 'win32':
+        subprocess.run(['cls'], shell=True, check=True)
+    elif sys.platform in ('darwin', 'linux', 'bsd', 'unix'):
+        subprocess.run(['clear'], check=True)
+    #:
+#:
+
+def pause(msg: str = 'Pressione ENTER para continuar...', indent = DEFAULT_INDENTATION):
+    input(f"{' ' * indent}{msg}")
+#:
+
+produtos : CatalogoProdutos | None = None
+
+def entrada(msg: str, indent = DEFAULT_INDENTATION) -> str:
+    return input(f"{' ' * DEFAULT_INDENTATION}{msg}")
+
+def exec_listar():
+    cabecalho = f'{"ID":^8}|{"Nome":^26}|{"Tipo":^8}|{"Quantidade":^16}|{"Preço":^16}'
+    separador = f'{"-" * 8}+{"-" * 26}+{"-" * 8}+{"-" * 16}+{"-" * 16}'
+    # separador =  '|'.join(['-' * 16] * 5)
+    print()
+    exibe_msg(cabecalho)
+    exibe_msg(separador)
+    for prod in produtos:
+        linha = f'{prod.id:^8}|{prod.nome:^26}|{prod.tipo:^8}|{prod.quantidade:^16}|{prod.preco:^16}'
+        exibe_msg(linha)
+    #:
+    exibe_msg(separador)
+    print()
+    pause()
+#:
+
+def exec_terminar():
+    sys.exit(0)
+#:
+
+def exec_menu():
+    """
+    - Lista o catálogo
+    - Pesquisar por alguns campos
+    - Eliminar um registo do catálogo
+    - Guardar o catálogo em ficheiro
+    """
+
+    while True:
+        cls()
+        exibe_msg("*******************************************")
+        exibe_msg("* L - Listar catálogo                     *")
+        exibe_msg("* P - Pesquisar por id                    *")
+        exibe_msg("* A - Acrescentar produto                 *")
+        exibe_msg("* E - Eliminar produto                    *")
+        exibe_msg("* G - Guardar catálogo em ficheiro        *")
+        exibe_msg("*                                         *")
+        exibe_msg("* T - Terminar programa                   *")
+        exibe_msg("*******************************************")
+
+        print()
+        opcao = entrada("OPCAO> ").strip().upper()
+
+        if opcao in ('L', 'LISTAR'):
+            exec_listar()
+        elif opcao in ('T', 'TERMINAR'):
+            exec_terminar()
+        else:
+            exibe_msg(f"Opção {opcao} inválida!")
+            pause()
+#:
+
+def main() -> None:
+    global produtos
+    produtos = le_produtos('produtos.csv')
+    exec_menu()
 #:
 
 if __name__ == '__main__':
