@@ -59,6 +59,18 @@ class Produto:
         self.preco = preco
     #:
 
+    @classmethod
+    def from_csv(cls, line: str, delim = CSV_DEFAULT_DELIM) -> 'Produto':
+        attrs = line.split(delim)
+        return cls(
+                id_ = int(attrs[0]),
+                nome = attrs[1],
+                tipo = attrs[2],
+                quantidade = int(attrs[3]),
+                preco = dec(attrs[4])
+            )
+    #:
+
     @property # criando atributo computado
     def get_desc_tipo(self) -> str:
         return PRODUCT_TYPES[self.tipo]
@@ -79,6 +91,17 @@ class Produto:
         return self.preco * (1 + taxa_iva / 100)
     #:
 #:
+
+# class ProdutoEspecial(Produto):
+#     def __init__(self, promocao, *args, **kargs):
+#         super().__init__(*args, **kargs)
+#         self.promocao = promocao
+#     #:
+
+#     def valor_stock(self) -> dec:
+#         return self.quantidade * self.preco;
+#     #:
+# #:
 
 class InvalidProdAttribute(ValueError):
     pass
@@ -133,16 +156,39 @@ class DuplicateValue(Exception):
     pass
 #:
 
-def main() -> None:
-    produtos = CatalogoProdutos()
-    produtos.append(Produto(30987, 'pão de milho', 'AL', 2, dec('1')))
-    produtos.append(Produto(30098,'leite mimosa','AL',10,dec('2')))
-    produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
-    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
+################################################################################
+##
+##       LEITURA DOS FICHEIROS
+##
+################################################################################
 
+def le_produtos(caminho_fich: str, delim = CSV_DEFAULT_DELIM) -> CatalogoProdutos:
+    prods = CatalogoProdutos()
+    with open(caminho_fich, 'rt') as file:
+        for line in linhas_relevantes(file):
+            prods.append(Produto.from_csv(line, delim))
+    return prods
+#:
+
+def linhas_relevantes(file: TextIO):
+    for line in file:
+        line = line.strip()
+        if len(line) == 0 or line[0] == '#':
+            continue
+        yield line
+
+
+def main() -> None:
+    # produtos = CatalogoProdutos()
+    # produtos.append(Produto(30987, 'pão de milho', 'AL', 2, dec('1')))
+    # produtos.append(Produto(30098,'leite mimosa','AL',10,dec('2')))
+    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
+    # produtos.append(Produto(21109,'fairy','DL',20,dec('3')))
+    # produtos.pesquisa(lambda prod: prod.tipo == 'AL')._dump()
+    
+    produtos = le_produtos('produtos.csv')
     produtos._dump()
 
-    # produtos.pesquisa(lambda prod: prod.tipo == 'AL')._dump()
 #:
 
 if __name__ == '__main__':
