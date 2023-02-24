@@ -31,7 +31,7 @@ async def register(player: sch.PlayerRegister) -> sch.PlayerRegisterResult:
         raise HTTPException(status_code = 404, detail=error.details(tourn_id = tourn_id))
 
     return sch.PlayerRegisterResult(
-        id = 1105,
+        id = tourn_id,
         full_name = player.full_name,
         email = player.email,
     )

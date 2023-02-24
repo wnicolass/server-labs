@@ -14,7 +14,7 @@ import {
 } from "./utils.js";
 
 const URL = "http://127.0.0.1:8000";
-const tournamentID = 1;
+const TOURNAMENT_ID = 0;
 
 //adding validators
 addPredicates({
@@ -37,6 +37,38 @@ window.addEventListener("load", function () {
   whenClick("submit", validateAndSubmitForm);
 });
 
+async function registerPlayer() {
+  const player = {
+    full_name: bySel("[name=fullName]").value,
+    email: bySel("[name=email]").value,
+    password: bySel("[name=password]").value,
+    phone_number: bySel("[name=phoneNumber]").value,
+    birth_date: bySel("[name=birthDate]").value,
+    level: bySel("[name=level]").value,
+    tournament_id: TOURNAMENT_ID,
+  };
+
+  const response = await byPOSTasJSON(`${URL}/register`, player);
+  return [response.ok, await response.json()];
+}
+
+async function validateAndSubmitForm() {
+  if (!validateAllFields) {
+    return;
+  }
+
+  try {
+    const [responseOK, responseData] = await registerPlayer();
+    const showStatusFn = responseOK ? showSuccess : showError;
+    showStatusFn(responseData);
+  } catch (error) {
+    console.error(
+      `ERROR: An error has occurred when connecting to server at ${URL}`
+    );
+    console.error(error);
+  }
+}
+
 /**
  * @param {Object} responseData
  */
@@ -56,7 +88,9 @@ Email: ${responseData.email}`;
  * @param {Object} responseData
  */
 function showError(responseData) {
-  const msg = `Não foi possível concluir a inscrição. ${responseData.detail}`;
+  // const msg = `Não foi possível concluir a inscrição. ${responseData.detail}`;
+  const errorInfo = responseData.detail;
+  const msg = `Não foi possível concluir a inscrição. ${errorInfo.error_msg}`;
   showSubmissionInfo(msg, false);
 }
 
