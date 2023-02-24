@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import schemas as sch
-from schemas import ErrorCode
+# from schemas import ErrorCode
 
 app = FastAPI()
 
@@ -20,7 +20,19 @@ app.add_middleware(
 
 @app.post('/register')
 async def register(player: sch.PlayerRegister) -> sch.PlayerRegisterResult:
-    return f"bem vindo {player}"
+    tourn_id = player.tournament_id
+    if tourn_id is None:
+        detail = {
+            'error_code': 'ERR_UNSPECIFIED_TOURNAMENT',
+            'error_msg': 'Unknown tournament id'
+        }
+        raise HTTPException(status_code = 400, detail = detail)
+    
+    return sch.PlayerRegisterResult(
+        id = 1105,
+        full_name = player.full_name,
+        email = player.email
+    )
 
 ###################################
 def main():

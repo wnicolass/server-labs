@@ -16,5 +16,3 @@ class PlayerRegister(PlayerBase):
 
 class PlayerRegisterResult(PlayerBase):
     id: int
-    full_name: str
-    email: str
