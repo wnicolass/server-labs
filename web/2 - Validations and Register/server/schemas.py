@@ -5,6 +5,9 @@ class PlayerBase(BaseModel):
     full_name: str
     email: str
 
+    class Config:
+        orm_mode = True
+
 class PlayerRegister(PlayerBase):
     password: str
     phone_number: str | None = Field(
