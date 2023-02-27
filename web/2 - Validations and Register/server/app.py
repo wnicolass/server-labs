@@ -1,9 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqlalchemy.orm import Session
+
 import database as db
-import models
 import schemas as sch
+import database_crud as crud
+import models
 from schemas import ErrorCode
 
 app = FastAPI()
@@ -21,22 +24,38 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-@app.post('/register')
-async def register(player: sch.PlayerRegister) -> sch.PlayerRegisterResult:
+def get_db_session():
+    db_session = db.SessionLocal()
+    try:
+        yield db_session
+    finally:
+        db_session.close()
+
+@app.post('/register', response_model = sch.PlayerRegisterResult)
+async def register(
+    player: sch.PlayerRegister, 
+    db_session: Session = Depends(get_db_session)
+) -> sch.PlayerRegisterResult:
     tourn_id = player.tournament_id
     if tourn_id is None:
         error = ErrorCode.ERR_UNSPECIFIED_TOURNAMENT
         raise HTTPException(status_code = 400, detail=error.details())
 
-    if tourn_id not in (1, 2, 3):
-        error = ErrorCode.ERR_UNKNOWN_TOURNAMENT_ID
-        raise HTTPException(status_code = 404, detail=error.details(tourn_id = tourn_id))
+    db_player = crud.get_player_by_email(db_session, player.email)
+    if not db_player:
+        db_player = crud.create_player(db_session, player)
 
-    return sch.PlayerRegisterResult(
-        id = tourn_id,
-        full_name = player.full_name,
-        email = player.email,
-    )
+    if db_player.tournament_id == tourn_id:
+        error = ErrorCode.ERR_PLAYER_ALREADY_ENROLLED
+        raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
+    
+    if crud.get_tournament_by_id(db_session, tourn_id) is None:
+        error = ErrorCode.ERR_UNKNOWN_TOURNAMENT_ID
+        raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
+    
+    crud.update_player_tournament(db_session, db_player, tourn_id)
+
+    return db_player
 
 ###################################
 def main():
