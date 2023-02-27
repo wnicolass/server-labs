@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+import database as db
+import models
 import schemas as sch
 from schemas import ErrorCode
 
@@ -57,9 +59,9 @@ Options:
     create_ddl = args['--create-ddl']
     populate_db = args['--populate-db']
     if create_ddl:
-        print("Will create ddl")
+        db.create_metadata()
         if populate_db:
-            print("Will also populate the DB")
+            models.populate_db()
     
             
     uvicorn.run(
