@@ -14,7 +14,7 @@ import {
 } from "./utils.js";
 
 const URL = "http://127.0.0.1:8000";
-const TOURNAMENT_ID = 0;
+const TOURNAMENT_ID = 1;
 
 //adding validators
 addPredicates({
