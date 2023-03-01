@@ -18,6 +18,9 @@ def get_player_by_id(db_session: Session, player_id: int) -> models.Player | Non
         models.Player.id == player_id
     ).first()
 
+# def get_enrollments(db_session: Session, tourn_id: int):
+    
+
 def create_player(db_session: Session, player: schemas.PlayerBase) -> models.Player:
     fake_hashed_password = player.password + '-hashedpw'
     db_player = models.Player(
@@ -35,7 +38,7 @@ def create_player(db_session: Session, player: schemas.PlayerBase) -> models.Pla
 def update_player_tournament(
         db_session: Session,
         db_player: models.Player,
-        tournament_id: int
+        tournament: models.Tournament
 ):
-    db_player.tournament_id = tournament_id
+    db_player.tournament.append(tournament)
     db_session.commit()

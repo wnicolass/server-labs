@@ -45,15 +45,18 @@ async def register(
     if not db_player:
         db_player = crud.create_player(db_session, player)
 
-    if db_player.tournament_id == tourn_id:
-        error = ErrorCode.ERR_PLAYER_ALREADY_ENROLLED
-        raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
+    tournament = crud.get_tournament_by_id(db_session, tourn_id)
     
-    if crud.get_tournament_by_id(db_session, tourn_id) is None:
+    if tournament is None:
         error = ErrorCode.ERR_UNKNOWN_TOURNAMENT_ID
         raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
     
-    crud.update_player_tournament(db_session, db_player, tourn_id)
+    for tourn in db_player.tournament:
+        if tourn.name == tournament.name:
+            error = ErrorCode.ERR_PLAYER_ALREADY_ENROLLED
+            raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
+    
+    crud.update_player_tournament(db_session, db_player, tournament)
 
     return db_player
 

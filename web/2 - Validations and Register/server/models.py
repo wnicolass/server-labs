@@ -11,7 +11,7 @@ Links:
     https://docs.sqlalchemy.org/en/14/faq/metadata_schema.html 
 """
 
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import (
     Boolean,
     Column,
@@ -19,7 +19,9 @@ from sqlalchemy import (
     Integer,
     String,
     Date,
-    CheckConstraint
+    DateTime,
+    CheckConstraint,
+    Table
 )
 from sqlalchemy.orm import relationship
 from database import Base, SessionLocal
@@ -27,6 +29,15 @@ from database import Base, SessionLocal
 # For simplicity, we'll assume that a player enrolls in one tournament
 # only. The relationship between Tournament and Player is one-to-many
 # Tournament 0..1 ______ 0..* Player.
+
+association_table = Table(
+    "Enrollment",
+    Base.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("tournament_id", Integer, ForeignKey("Tournament.id")),
+    Column("player_id", Integer, ForeignKey("Player.id")),
+    Column("enrolled_at", DateTime, default=datetime.now())
+)
 
 class Tournament(Base):
     __tablename__ = 'Tournament'
@@ -39,7 +50,7 @@ class Tournament(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
 
-    players_enrolled = relationship("Player", back_populates="tournament")
+    players_enrolled = relationship("Player", back_populates="tournament", secondary=association_table)
 
 class Player(Base):  # type: ignore  (Pylance )
     __tablename__ = 'Player'
@@ -52,8 +63,8 @@ class Player(Base):  # type: ignore  (Pylance )
     # birth_date      = Column(Date, nullable=False)
     level           = Column(String(30), nullable=False)
     is_active       = Column(Boolean, default=True)
-    tournament_id   = Column(Integer, ForeignKey("Tournament.id"))
-    tournament      = relationship("Tournament", back_populates="players_enrolled")
+    
+    tournament      = relationship("Tournament", back_populates="players_enrolled", secondary=association_table)
 
     # https://docs.sqlalchemy.org/en/13/orm/extensions/declarative/table_config.html
 #:
@@ -73,47 +84,67 @@ def populate_db():
             phone_number = '+351922781977',
             level = 'beginner',
         )
-        db_session.add_all([
-                Tournament(
-                    id         = 1,
-                    name      = 'Torneio da Páscoa',
-                    start_date = date(2023, 4, 17),
-                    end_date   = date(2023, 4, 25),
-                ),
-                Tournament(
-                    id         = 2,
-                    name      = 'Torneio da Amizade',
-                    start_date = date(2023, 5, 17),
-                    end_date   = date(2023, 5, 25),
-                ),
-                player1,
-                Player(
-                    full_name       = 'Augusto Avelar',
-                    email           = 'aug@mail.com',
-                    hashed_password = '123-hashedpw',
-                    phone_number    = '+351921061344',
-                    level           = 'pre-pro',
-                    tournament_id   = 1,
-                ),
-                Player(
-                    full_name       = 'Arnaldo Almeida',
-                    email           = 'arn@mail.com',
-                    hashed_password = 'xyz-hashedpw',
-                    phone_number    = '+351964139829',
-                    level           = 'advanced',
-                    tournament_id   = 2,
-                ),    
-            ])
-            # At this point, we say that the instance is pending; no SQL has
-            # yet been issued and the object is not yet represented by a row
-            # in the database. The Session will issue the SQL to persist Ed
-            # Jones as soon as is needed, using a process known as a flush.
-            # If we query the database for Ed Jones, all pending information
-            # will first be flushed, and the query is issued immediately
-            # thereafter.
-            # https://docs.sqlalchemy.org/en/14/orm/session_state_management.html#session-object-states
+        player2 = Player(
+            full_name       = 'Augusto Avelar',
+            email           = 'aug@mail.com',
+            hashed_password = '123-hashedpw',
+            phone_number    = '+351921061344',
+            level           = 'pre-pro',
+        )
+        tournament1 = Tournament(
+            id         = 1,
+            name      = 'Torneio da Páscoa',
+            start_date = date(2023, 4, 17),
+            end_date   = date(2023, 4, 25),
+        )
+        tournament2 = Tournament(
+            id         = 2,
+            name      = 'Torneio da Amizade',
+            start_date = date(2023, 5, 17),
+            end_date   = date(2023, 5, 25),
+        )
+        db_session.add_all([player1, player2, tournament1, tournament2])
+        player1.tournament.append(tournament1)
+        player1.tournament.append(tournament2)
+        # db_session.add_all([
+        #         Tournament(
+        #             id         = 1,
+        #             name      = 'Torneio da Páscoa',
+        #             start_date = date(2023, 4, 17),
+        #             end_date   = date(2023, 4, 25),
+        #         ),
+        #         Tournament(
+        #             id         = 2,
+        #             name      = 'Torneio da Amizade',
+        #             start_date = date(2023, 5, 17),
+        #             end_date   = date(2023, 5, 25),
+        #         ),
+        #         player1,
+        #         Player(
+        #             full_name       = 'Augusto Avelar',
+        #             email           = 'aug@mail.com',
+        #             hashed_password = '123-hashedpw',
+        #             phone_number    = '+351921061344',
+        #             level           = 'pre-pro',
+        #         ),
+        #         Player(
+        #             full_name       = 'Arnaldo Almeida',
+        #             email           = 'arn@mail.com',
+        #             hashed_password = 'xyz-hashedpw',
+        #             phone_number    = '+351964139829',
+        #             level           = 'advanced',
+        #         ),
+        #     ])
+        #     # At this point, we say that the instance is pending; no SQL has
+        #     # yet been issued and the object is not yet represented by a row
+        #     # in the database. The Session will issue the SQL to persist Ed
+        #     # Jones as soon as is needed, using a process known as a flush.
+        #     # If we query the database for Ed Jones, all pending information
+        #     # will first be flushed, and the query is issued immediately
+        #     # thereafter.
+        #     # https://docs.sqlalchemy.org/en/14/orm/session_state_management.html#session-object-states
 
-        player1.full_name = 'Armando Alvarez'  # type: ignore
+        # player1.full_name = 'Armando Alvarez'  # type: ignore
         # The Session is paying attention. It knows, for example, that
         # 'Armando Alvarez' has been modified.
         # At the REPL we can try 
