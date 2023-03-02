@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.orm import Session
+from sqlalchemy import column
 
 import database as db
 import schemas as sch
@@ -31,6 +32,17 @@ def get_db_session():
     finally:
         db_session.close()
 
+@app.get("/register")
+async def get_tournaments(db_session: Session = Depends(get_db_session)) -> list:
+    tournaments = db_session.query(column('id'), column('name')).select_from(models.Tournament)
+    ordered_tournaments = tournaments.order_by(models.Tournament.id).all()
+    
+    if len(ordered_tournaments) == 0:
+        error = ErrorCode.ERR_NO_TOURNAMENT_AVAILABLE
+        raise HTTPException(status_code = 500, detail=error.details())
+
+    return ordered_tournaments
+
 @app.post('/register', response_model = sch.PlayerRegisterResult)
 async def register(
     player: sch.PlayerRegister, 
@@ -52,7 +64,7 @@ async def register(
         raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
     
     for tourn in db_player.tournament:
-        if tourn.name == tournament.name:
+        if tourn.id == tournament.id:
             error = ErrorCode.ERR_PLAYER_ALREADY_ENROLLED
             raise HTTPException(status_code = 400, detail=error.details(tourn_id = tourn_id))
     

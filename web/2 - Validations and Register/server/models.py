@@ -106,35 +106,6 @@ def populate_db():
         db_session.add_all([player1, player2, tournament1, tournament2])
         player1.tournament.append(tournament1)
         player1.tournament.append(tournament2)
-        # db_session.add_all([
-        #         Tournament(
-        #             id         = 1,
-        #             name      = 'Torneio da Páscoa',
-        #             start_date = date(2023, 4, 17),
-        #             end_date   = date(2023, 4, 25),
-        #         ),
-        #         Tournament(
-        #             id         = 2,
-        #             name      = 'Torneio da Amizade',
-        #             start_date = date(2023, 5, 17),
-        #             end_date   = date(2023, 5, 25),
-        #         ),
-        #         player1,
-        #         Player(
-        #             full_name       = 'Augusto Avelar',
-        #             email           = 'aug@mail.com',
-        #             hashed_password = '123-hashedpw',
-        #             phone_number    = '+351921061344',
-        #             level           = 'pre-pro',
-        #         ),
-        #         Player(
-        #             full_name       = 'Arnaldo Almeida',
-        #             email           = 'arn@mail.com',
-        #             hashed_password = 'xyz-hashedpw',
-        #             phone_number    = '+351964139829',
-        #             level           = 'advanced',
-        #         ),
-        #     ])
         #     # At this point, we say that the instance is pending; no SQL has
         #     # yet been issued and the object is not yet represented by a row
         #     # in the database. The Session will issue the SQL to persist Ed
