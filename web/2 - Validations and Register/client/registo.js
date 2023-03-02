@@ -14,7 +14,6 @@ import {
 } from "./utils.js";
 
 const URL = "http://127.0.0.1:8000";
-const TOURNAMENT_ID = 1;
 
 //adding validators
 addPredicates({
@@ -35,7 +34,35 @@ window.addEventListener("load", function () {
   installValidators();
   whenClick("reset", (e) => resetAllFields());
   whenClick("submit", validateAndSubmitForm);
+  fetchTournaments();
 });
+
+function fillTournamentField(tournaments) {
+  const selectElement = bySel("[name=tournament]");
+  for (const { id, name } of tournaments) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = name;
+
+    selectElement.appendChild(option);
+  }
+}
+
+async function fetchTournaments() {
+  try {
+    const response = await fetch(`${URL}/register`);
+    const tournaments = await response.json();
+    if (!response.ok) {
+      showError(tournaments);
+      throw new Error(
+        `ERROR: An error has occurred when connecting to server at ${URL}`
+      );
+    }
+    fillTournamentField(tournaments);
+  } catch (err) {
+    console.error(err.message);
+  }
+}
 
 async function registerPlayer() {
   const player = {
@@ -45,7 +72,7 @@ async function registerPlayer() {
     phone_number: bySel("[name=phoneNumber]").value,
     birth_date: bySel("[name=birthDate]").value,
     level: bySel("[name=level]").value,
-    tournament_id: TOURNAMENT_ID,
+    tournament_id: bySel("[name=tournament]").value,
   };
 
   const response = await byPOSTasJSON(`${URL}/register`, player);
