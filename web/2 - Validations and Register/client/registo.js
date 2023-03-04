@@ -13,6 +13,8 @@ import {
   byPOSTasJSON,
 } from "./utils.js";
 
+import { trDoc, setCurrentLanguage } from "./locale.js";
+
 const URL = "http://127.0.0.1:8000";
 
 //adding validators
@@ -35,6 +37,8 @@ window.addEventListener("load", function () {
   whenClick("reset", (e) => resetAllFields());
   whenClick("submit", validateAndSubmitForm);
   fetchTournaments();
+  trDoc(document.body);
+  whenClick("lang", setCurrentLanguage);
 });
 
 function fillTournamentField(tournaments) {
