@@ -58,12 +58,16 @@ body {
   transition: transform 0.3s ease-in-out;
 }
 
-#lang span.in-action {
+#lang.in-action span {
   transform: translateX(-40px);
 }
 
 #lang img {
   width: 2rem;
+}
+
+#terms {
+  display: inline;
 }
 
 main {

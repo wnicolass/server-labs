@@ -46,7 +46,7 @@ const userMessages = {
     PLAYER: "Jogador",
     EMAIL_ADDR: "Endereço de email",
     TOURNAMENT_NAME: "Torneio da Primavera",
-    TOURNAMENT_PRIZES: "Prémios até ao 10&#x2070; lugar",
+    TOURNAMENT_PRIZES: "Prémios até ao 10º lugar",
     RULES: "Regulamento",
     MEMBERS: "Membros",
     ENROLL_HERE: "Inscreva-se aqui",
@@ -58,7 +58,7 @@ const userMessages = {
     REPEAT_PASSWORD_LABEL: "Senha de novo",
     PLAYER_LEVEL_LABEL: "Nível",
     DATE_FMT: "(DD/MM/AAAA)",
-    PRIVACY_POLICY_MSG: "Li e concordo com a",
+    PRIVACY_POLICY_MSG: "Li e concordo com a ",
     PRIVACY_POLICY: "Política de Privacidade",
     BEGINNER_LEVEL: "Iniciado",
     INTERMEDIATE_LEVEL: "Intermédio",
@@ -76,33 +76,67 @@ class UnknownMessageID extends Error {}
 class UnknownLanguage extends Error {}
 
 let currentLanguage = "en_US";
-function setCurrentLanguage({ target }) {
-  currentLanguage = currentLanguage === "en_US" ? "pt_PT" : "en_US";
-  target.classList.toggle("in-action");
-  trDoc(document.body);
+let currentMessageId;
+let currentResData;
+
+function translateMessage() {
+  const msgDiv = document.querySelector(".submission-status");
+  if (msgDiv.classList.length <= 1) {
+    return;
+  }
+  msgDiv.innerHTML = tr(currentMessageId, currentResData);
 }
 
-function tr(messageID) {}
+function setCurrentLanguage({ target }) {
+  const circleElement = target.closest("div");
+  currentLanguage = currentLanguage === "en_US" ? "pt_PT" : "en_US";
+  circleElement.classList.toggle("in-action");
+  trDoc(document.body);
+  translateMessage();
+}
+
+function tr(messageID, responseData) {
+  [currentMessageId, currentResData] = [messageID, responseData];
+  const isError = messageID.startsWith("ERR");
+  const message = userMessages[currentLanguage][messageID];
+  const messageCode = userMessages[currentLanguage][responseData];
+  return isError
+    ? `${message} ${messageCode}`
+    : `${userMessages[currentLanguage][messageID]}<br>
+  ${userMessages[currentLanguage]["PLAYER"]}: ${responseData.full_name} <br>
+  ID: ${responseData.id} <br>
+  ${userMessages[currentLanguage]["EMAIL_ADDR"]}: ${responseData.email}`;
+}
 
 const trDoc = (function () {
   const trDocRe = /{{(tr|TR)\s{1}([A-Z]+(_)?)+}}/;
+  let trCode;
   return function trDocs(ancestorNode) {
     const allElements = ancestorNode.querySelectorAll("*");
-    allElements.forEach((element, idx) => {
-      if (
-        element.nodeName === "DIV" ||
-        element.nodeName === "FORM" ||
-        element.nodeName === "SELECT" ||
-        element.nodeName === "MAIN" ||
-        !element.innerText
-      ) {
+    allElements.forEach((element) => {
+      const codeFromDataAttr = element.dataset.trcode;
+      if (codeFromDataAttr) {
+        !element.placeholder
+          ? (element.innerText =
+              userMessages[currentLanguage][codeFromDataAttr])
+          : (element.placeholder =
+              userMessages[currentLanguage][codeFromDataAttr]);
         return;
       }
+      const rejectableElements = ["DIV", "FORM", "SELECT", "MAIN", "SPAN"];
+      if (rejectableElements.some((el) => el === element.nodeName)) {
+        return;
+      }
+      element.placeholder &&= userMessages[currentLanguage][trCode];
+      element.placeholder && element.setAttribute("data-trcode", trCode);
       const data = element.innerText && element.innerText.match(trDocRe);
-      const partialCode = data && data[0].trim();
-      const trCode =
-        partialCode && partialCode.substring(5, partialCode.length - 2);
-      element.innerText = userMessages[currentLanguage][trCode];
+      const partialCode = data && data[0];
+      trCode =
+        partialCode && partialCode.trim().substring(5, partialCode.length - 2);
+      if (trCode) {
+        element.setAttribute("data-trcode", trCode);
+        element.innerText = userMessages[currentLanguage][trCode];
+      }
     });
   };
 })(currentLanguage);

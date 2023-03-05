@@ -13,7 +13,7 @@ import {
   byPOSTasJSON,
 } from "./utils.js";
 
-import { trDoc, setCurrentLanguage } from "./locale.js";
+import { trDoc, setCurrentLanguage, tr } from "./locale.js";
 
 const URL = "http://127.0.0.1:8000";
 
@@ -104,10 +104,7 @@ async function validateAndSubmitForm() {
  * @param {Object} responseData
  */
 function showSuccess(responseData) {
-  const msg = `Inscrição realizada com sucesso.<br>
-Player: ${responseData.full_name} <br>
-ID: ${responseData.id} <br>
-Email: ${responseData.email}`;
+  const msg = tr("SUCCESS_ENROLLING", responseData);
   const formFields = document.querySelector(".info");
   formFields.style.display = "none";
   const elemsToHide = document.querySelectorAll("form > button, .checkbox");
@@ -121,7 +118,7 @@ Email: ${responseData.email}`;
 function showError(responseData) {
   // const msg = `Não foi possível concluir a inscrição. ${responseData.detail}`;
   const errorInfo = responseData.detail;
-  const msg = `Não foi possível concluir a inscrição. ${errorInfo.error_msg}`;
+  const msg = tr("ERR_ENROLLING", errorInfo.error_code);
   showSubmissionInfo(msg, false);
 }
 
