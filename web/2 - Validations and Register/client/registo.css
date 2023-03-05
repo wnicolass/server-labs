@@ -29,6 +29,47 @@ body {
   background-size: cover;
 }
 
+#lang {
+  position: absolute;
+  width: 4.5rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: space-between;
+
+  margin: 1rem;
+  padding: 0.2rem;
+
+  background-color: #122343;
+  border-radius: 1rem;
+}
+
+#lang span {
+  position: absolute;
+  right: 3px;
+  width: 2rem;
+  height: 2rem;
+  background-color: #fff;
+  border-radius: 1rem;
+
+  transition: transform 0.3s ease-in-out;
+}
+
+#lang.in-action span {
+  transform: translateX(-40px);
+}
+
+#lang img {
+  width: 2rem;
+}
+
+#terms {
+  display: inline;
+}
+
 main {
   /* border: 1px solid red; */
   min-height: 100vh;
