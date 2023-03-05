@@ -45,7 +45,7 @@ class Tournament(Base):
         CheckConstraint('end_date >= start_date', name='check_dates'),
     )
 
-    id = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False, unique=True)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
@@ -92,13 +92,11 @@ def populate_db():
             level           = 'pre-pro',
         )
         tournament1 = Tournament(
-            id         = 1,
             name      = 'Torneio da Páscoa',
             start_date = date(2023, 4, 17),
             end_date   = date(2023, 4, 25),
         )
         tournament2 = Tournament(
-            id         = 2,
             name      = 'Torneio da Amizade',
             start_date = date(2023, 5, 17),
             end_date   = date(2023, 5, 25),

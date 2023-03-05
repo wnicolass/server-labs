@@ -13,7 +13,7 @@ import {
   byPOSTasJSON,
 } from "./utils.js";
 
-import { trDoc, setCurrentLanguage, tr } from "./locale.js";
+import { trDoc, setCurrentLanguage, tr, onTournamentPage } from "./locale.js";
 
 const URL = "http://127.0.0.1:8000";
 
@@ -30,13 +30,14 @@ addPredicates({
   },
   "date_DD/MM/YYYY": isValidDate,
   phoneNumber: /^(\+\d{3})?\d{9}$/,
+  tournament: /^(\p{Letter}+\s?)+$/u,
 });
 
 window.addEventListener("load", function () {
   installValidators();
   whenClick("reset", (e) => resetAllFields());
   whenClick("submit", validateAndSubmitForm);
-  fetchTournaments();
+  !onTournamentPage && fetchTournaments();
   trDoc(document.body);
   whenClick("lang", setCurrentLanguage);
 });
@@ -54,7 +55,7 @@ function fillTournamentField(tournaments) {
 
 async function fetchTournaments() {
   try {
-    const response = await fetch(`${URL}/register`);
+    const response = await fetch(`${URL}/tournaments`);
     const tournaments = await response.json();
     if (!response.ok) {
       showError(tournaments);
@@ -83,13 +84,27 @@ async function registerPlayer() {
   return [response.ok, await response.json()];
 }
 
+async function registerTournament() {
+  const tournament = {
+    name: bySel("[name=name]").value,
+    start_date: bySel("[name=startDate]").value,
+    end_date: bySel("[name=endDate]").value,
+  };
+
+  const res = await byPOSTasJSON(`${URL}/tournaments`, tournament);
+  return [res.ok, await res.json()];
+}
+
 async function validateAndSubmitForm() {
   if (!validateAllFields) {
     return;
   }
 
   try {
-    const [responseOK, responseData] = await registerPlayer();
+    const fetchToBeExecuted = onTournamentPage
+      ? registerTournament
+      : registerPlayer;
+    const [responseOK, responseData] = await fetchToBeExecuted();
     const showStatusFn = responseOK ? showSuccess : showError;
     showStatusFn(responseData);
   } catch (error) {
@@ -104,7 +119,9 @@ async function validateAndSubmitForm() {
  * @param {Object} responseData
  */
 function showSuccess(responseData) {
-  const msg = tr("SUCCESS_ENROLLING", responseData);
+  const msg = onTournamentPage
+    ? tr("SUCCESS_ENROLLING", responseData, true)
+    : tr("SUCCESS_ENROLLING", responseData);
   const formFields = document.querySelector(".info");
   formFields.style.display = "none";
   const elemsToHide = document.querySelectorAll("form > button, .checkbox");

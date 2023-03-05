@@ -66,6 +66,21 @@ body {
   width: 2rem;
 }
 
+body #link {
+  color: #fff;
+  text-decoration: none;
+  background-color: var(--button-main-color);
+
+  position: absolute;
+  top: 10px;
+  right: 13px;
+
+  padding: 0.625rem 0.3125rem;
+  border-radius: 0.3125rem;
+
+  cursor: pointer;
+}
+
 #terms {
   display: inline;
 }
@@ -244,7 +259,8 @@ button {
 }
 
 button:hover,
-.btn-item:hover {
+.btn-item:hover,
+body #link:hover {
   background: #85d6de;
 }
 

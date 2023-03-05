@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Registo Torneio</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="registo.css" />
+    <script type="module" src="registo.js" defer></script>
+    <!-- <meta http-equiv="Content-Security-Policy" content="connect-src 'self' http://127.0.0.1:8000"> -->
+  </head>
+
+  <body>
+    <a id="link" href="registo.html"
+      >{{tr CHANGE_FORM}}</a
+    >
+    <div id="lang" data-lang="en_US">
+      <img src="./united-states.png" alt="United States Flag" />
+      <span></span>
+      <img src="./portugal.png" alt="Portugal Flag" />
+    </div>
+    <main>
+      <div class="left-part">
+        <i class="fa fa-table-tennis fa-4x"></i>
+        <h1>{{tr WELCOME}}</h1>
+        <p>{{tr IS_ADMIN}}</p>
+      </div>
+      <form autocomplete="off" novalidate>
+        <div class="title">
+          <i class="fas fa-pencil-alt"></i>
+          <h2>{{tr INSERT_HERE}}</h2>
+        </div>
+        <div class="submission-status"></div>
+        <div class="info">
+          <div class="field">
+            <label>{{tr TOURNAMENT_NAME_LABEL}}</label>
+            <input
+              type="text"
+              name="name"
+              required
+              autofocus
+              data-validation="tournament"
+              value="Torneio da Alegria"
+              placeholder="{{tr TOURNAMENT_NAME_LABEL}}"
+            />
+            <span class="status"></span>
+          </div>
+          <div class="field">
+            <label
+              >{{tr START_DATE_LABEL}}</label
+            >
+            <input
+              type="text"
+              name="startDate"
+              required
+              data-validation="date_DD/MM/YYYY"
+              value="20/12/23"
+              placeholder="{{tr START_DATE_LABEL}}"
+            />
+            <span class="status"></span>
+          </div>
+          <div class="field">
+            <label>{{tr END_DATE_LABEL}}</label>
+            <input
+              type="text"
+              name="endDate"
+              data-validation="date_DD/MM/YYYY"
+              value="23/12/23"
+              placeholder="{{tr END_DATE_LABEL}}"
+            />
+            <span class="status"></span>
+          </div>
+        <button type="button" id="submit" href="/">{{tr SUBMIT_BTN}}</button>
+        <button type="button" id="reset" href="/">{{tr RESET_BTN}}</button>
+      </form>
+    </main>
+  </body>
+</html>
