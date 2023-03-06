@@ -80,7 +80,7 @@ async def index(response: Request):
 @template()
 async def about(request: Request):
     return {
-        'num_courses': 99,
+        'num_courses': 199,
         'num_students': 2315,
         'num_trainers': 23,
         'num_events': 159,
