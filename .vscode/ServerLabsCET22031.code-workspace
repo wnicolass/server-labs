@@ -6,6 +6,9 @@
   ],
   "settings": {
     "terminal.integrated.fontSize": 16,
-    "liveServer.settings.ignoreFiles": [".vscode/**", "**/*.db"]
+    "liveServer.settings.ignoreFiles": [".vscode/**", "**/*.db"],
+    "files.exclude": {
+      "__pycache__": true
+    }
   }
 }
