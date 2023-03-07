@@ -176,3 +176,141 @@ sorted(names, reverse=True)
 [2 * num for num in nums]
 [x for x in nums if x > 0]
 [2 * num for num in nums if num > 0]
+
+############################################
+#
+#    RECURSIVIDADE
+# Funções internas / aninhadas / nested
+#
+############################################
+
+# N! = N x (N-1) * (N-2) x ... x 1
+# N! = N x (N-1)!
+# 1! = 1
+# 0! = 1
+
+def factorialI(n: int) -> int:
+    res = 1
+    for i in range(n, 1, -1):
+        res *= i
+    return res
+#:
+
+def factorialR(n: int) -> int:
+    if n in (0, 1):
+        return 1
+    return n * factorialR(n - 1);
+
+############################################
+#
+#    FIBONACCI
+# Funções internas / aninhadas / nested
+#
+############################################
+
+# Fib(N) = Fib(N-1) x (FibN-2)
+# Fib(1) = 1
+# Fib(0) = 0
+
+def fibI(n):
+    if n in (0, 1):
+        return n
+    x, y = 0, 1  # n = 5, x 2, y 3, 5 range 6
+    for _ in range(2, n+1):
+        y, x = y + x, y
+    return y
+#:
+
+def fibII(n):
+    if n in (0, 1):
+        return n
+    f2, f1 = 0, 1
+    for _ in range(2, n + 1):
+        fN = f1 + f2
+        f2 = f1
+        f1 = fN
+    return fN
+#:
+
+def fibR(n):
+    if n in (0, 1):
+        return n
+    return fibR(n - 1) + fibR(n - 2)
+
+# fib(5 - 1) + fib(5 - 2)
+# fib(4)       fib(3)
+# fib(4 - 1) + fib(4 - 2)
+# fib(3) = 2    fib(2) 
+# fib(3 - 1) + fib(3 - 2)
+# fib(2) = 1   fib(1)
+# fib(2 - 1) + fib(2 - 2)
+# fib(1) + fib(0)
+
+
+#
+# PALINDROMO 
+
+# Exemplo: txt = 'AABAA'
+#
+#     i ->
+#     0     1     2     3     4
+#     A  |  A  |  B  |  A  |  A 
+#    -5    -4    -3    -2    -1
+#                          <- j
+
+def e_palindromoI(txt: str) -> bool:
+    i, j = 0, len(txt) - 1
+    while i < j:
+        if txt[i] != txt[j]:
+            return False
+        i += 1
+        j -= 1
+    #:
+    return True
+#:
+
+def e_palindromoII(txt: str) -> bool:
+    if len(txt) <= 1:
+        return True
+    return txt[0] == txt[-1] and e_palindromoII(txt[1:-1])
+#:
+
+# e_palindromoR('ABCBA') = ('A' == 'A' and e_palindromoR('BCB'))
+#                        = True and True
+#                        = True
+
+# e_palindromoR('BCB') = ('B' == 'B' and e_palindromoR('C'))
+#                      = True and True 
+#                      = True
+
+# e_palindromoR('C') = True (pq len('B') <= 1)
+
+# FLATTEN
+nums = [1, 2, [3, [4, 5], 6], 7] 
+
+def flatten(lst: list) -> list:
+    if len(lst) == 0:
+        return []
+
+    first, rest = lst[0], lst[1:]
+    if isinstance(first, list):
+        return flatten(first) + flatten(rest)
+    return [first] + flatten(rest)
+#: 
+
+def flatten(lst: list) -> list:
+    def do_flatten(lst: list, pos: int, ret_list: list):
+        if pos == len(lst):
+            return
+
+        first = lst[pos]
+        if isinstance(first, list):
+            do_flatten(first, 0, ret_list)
+        else:
+            ret_list.append(first)
+        do_flatten(lst, pos + 1, ret_list)
+    #:
+    ret_list = []
+    do_flatten(lst, 0, ret_list)
+    return ret_list 
+#:
