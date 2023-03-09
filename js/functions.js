@@ -194,3 +194,195 @@ let allPositive = true;
 allPositive = nums.every((num) => num >= 0);
 let atLeastOnePositive = nums.some((num) => num >= 0);
 console.log(allPositive, atLeastOnePositive);
+
+////////////////////////////////////////////////////////////////////////
+//
+//      RECURSIVIDADE
+//      FUNCÕES INTERNAS / ANINHADAS
+//
+////////////////////////////////////////////////////////////////////////
+
+//
+// FACTORIAL
+
+// N! = N x (N-1) x (N-2) x ... x 1
+// N! = N x (N-1)!
+// 1! = 1
+// 0! = 1
+
+function factorialI(n) {
+  let res = 1;
+  for (let i = n; i > 0; i -= 1) {
+    res *= i;
+  }
+  return res;
+}
+
+function factorialR(n) {
+  if ([0, 1].includes(n)) {
+    return 1;
+  }
+  return n * factorialR(n - 1);
+}
+
+// factorialR(5) = 5 * 24 = 120
+// factorialR(4) = 4 * 6 = 24
+// factorialR(3) = 3 * 2 = 6
+// factorialR(2) = 2 * 1 = 2
+// factorialR(1) = 1
+
+//
+// FIBONACCI
+
+// Fib(N) = Fib(N-1) + Fib(N-2)
+// Fib(1) = 1
+// Fib(0) = 0
+
+function fibI(n) {
+  if ([0, 1].includes(n)) {
+    return n;
+  }
+  let [x, y] = [0, 1];
+  for (let i = 2; i <= n; i += 1) {
+    [y, x] = [y + x, y];
+  }
+  return y;
+}
+
+function fibI(n) {
+  if ([0, 1].includes(n)) {
+    return n;
+  }
+  let [f2, f1] = [0, 1];
+  let fN;
+  for (let i = 2; i <= n; i += 1) {
+    fN = f1 + f2;
+    f2 = f1;
+    f1 = fN;
+  }
+  return fN;
+}
+
+function fibR(n) {
+  if ([0, 1].includes(n)) {
+    return n;
+  }
+  return fibR(n - 1) + fibR(n - 2);
+}
+
+//
+// PALINDROMO
+
+// Exemplo: txt = 'AABAA'
+//
+//     i ->
+//     0     1     2     3     4
+//     A  |  A  |  B  |  A  |  A
+//    -5    -4    -3    -2    -1
+//                          <- j
+
+function ePalindromo(txt) {
+  let [i, j] = [0, txt.length - 1];
+  while (i < j) {
+    if (txt[i] != txt[j]) {
+      return false;
+    }
+    i += 1;
+    j -= 1;
+  }
+  return true;
+}
+
+function ePalR(txt) {
+  if (txt.length <= 1) {
+    return true;
+  }
+  return txt[0] === txt[txt.length - 1] && ePalR(txt.slice(1, -1));
+}
+
+//
+// FLATTEN
+
+// let nums = [1, 2, [3, [4, 5], 6], 7];
+
+function flatten(arr) {
+  if (arr.length === 0) {
+    return [];
+  }
+  let [first, rest] = [arr[0], arr.slice(1)];
+  if (Array.isArray(first)) {
+    return flatten(first).concat(flatten(rest));
+  }
+  return [first].concat(flatten(rest));
+}
+
+function flatten(arr) {
+  function doFlatten(arr, pos, retArr) {
+    if (pos === arr.length) {
+      return;
+    }
+
+    let first = arr[pos];
+    if (Array.isArray(first)) {
+      doFlatten(first, 0, retArr);
+    } else {
+      retArr.push(first);
+    }
+    doFlatten(arr, pos + 1, retArr);
+  }
+
+  let retArr = [];
+  doFlatten(arr, 0, retArr);
+  return retArr;
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+//      CLOSURES E IIFES
+//
+////////////////////////////////////////////////////////////////////////
+
+// . Contexto da função interna, ou envolvida, inclui o contexto da função
+//   externa, ou envolvente
+// . Este contexto persiste após a função externa ter terminado
+// . Contexto de uma função é o âmbito do bloco dessa função (mais o âmbito
+//   global)
+// . Âmbito de uma função interna é um âmbito dessa função mais o âmbito da
+//   da função externa
+//
+// NOTA: Termo "contexto" utilizado como sinónimo de "âmbito" ou de
+//       "escopo" (scope)
+//
+// Âmbito de bloco (block scope):
+//
+//  {
+//      let X;
+//      {
+//          let Y;
+//          ... temos acesso a X e Y ...
+//      }
+//      ... temos acesso a apenas a X ...
+//  }
+//
+// O mesmo aplica-se a funções:
+//
+//  function verde() {
+//      let X;
+//      function vermelha() {
+//          let Y;
+//          ... temos acesso a X e Y ...
+//      }
+//      ... temos acesso a apenas a X ...
+//      return vermelha;    // funcao é um objecto com acesso a X e Y e params de preta
+//  }
+//
+//      ┌─────────────────────────────────┐
+//      │              ┌───────────────┐  │
+//      │              │               │  │
+//      │  VERMELHA    │     VERDE     │  │
+//      │              │               │  │
+//      │              └───────────────┘  │
+//      └─────────────────────────────────┘
+//
+
+// EXEMPLO 1: SOMADOR
