@@ -386,3 +386,151 @@ function flatten(arr) {
 //
 
 // EXEMPLO 1: SOMADOR
+function somador(n) {
+  function soma(x) {
+    return x + n;
+  }
+  return soma;
+}
+
+somaA = somador(10);
+somaA(1); // 11
+somaA(10); // 20
+
+// Ou, de forma mais sucinta, utilizando uma lambda:
+
+function somador(n) {
+  return function (x) {
+    return x + n;
+  };
+}
+
+// "Arrow functions", que também são lambdas, tornam o código ainda
+// mais sucinto:
+
+function somador(n) {
+  return (x) => x + n;
+}
+
+function counter() {
+  let count = 0;
+  return () => (count += 1);
+}
+
+function range(start, end, step = 1) {
+  let count = start;
+  return function () {
+    let value =
+      (step > 0 && count < end) || (step < 0 && count > end)
+        ? count
+        : undefined;
+    count = count + (value !== undefined) * step;
+    return value;
+  };
+}
+
+r1 = range(0, 3);
+console.log(r1()); // 0
+console.log(r1()); // 1
+console.log(r1()); // 2
+console.log(r1()); // undefined
+
+r2 = range(0, 10, 2);
+console.log(r2()); // 0
+console.log(r2()); // 2
+console.log(r2()); // 4
+console.log(r2()); // 6
+console.log(r2()); // 8
+console.log(r2()); // undefined
+
+r3 = range(20, 14, -2);
+console.log(r3()); // 20
+console.log(r3()); // 18
+console.log(r3()); // 16
+console.log(r3()); // undefined
+
+function makeToMonthName() {
+  let months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return function (monthNum) {
+    return months[monthNum - 1];
+  };
+}
+
+toMonthName = makeToMonthName();
+
+const toMonthName = (function () {
+  let months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return function toMonthName(monthNum) {
+    return months[monthNum - 1];
+  };
+})(); // IIFE : Immediately Invoked Function Expression
+
+function isValidDate(date) {
+  const YEAR = "(19[0-9][0-9]|20[0-4][0-9]|2050)";
+  const DD_MM_31 = "(0[1-9]|[12][0-9]|30|31)/(0[13578]|1[02])";
+  const DD_MM_30 = "(0[1-9]|[12][0-9]|30)/(0[469]|11)";
+  const DD_FEB = "(0[1-9]|1[0-9]|2[0-8])/02";
+  const LEAP_YEARS =
+    "(1904|1908|1912|1920|1924|1928|1932|1936|1940|1944" +
+    "|1948|1952|1956|1960|1964|1968|1972|1976|1980" +
+    "|1984|1988|1992|1996|2000|2004|2008|2012|2016" +
+    "|2020|2024|2028|2032|2036|2040|2044|2048)";
+  const DD_FEB_LEAP_YEAR = `(0[1-9]|[12][0-9])/02/${LEAP_YEARS}`;
+  const dateRegExp = new RegExp(
+    `^(${DD_FEB_LEAP_YEAR}|(${DD_MM_31}|${DD_MM_30}|${DD_FEB})/${YEAR})$`
+  );
+  return dateRegExp.test(date.trim());
+}
+
+const isValidDate = (function () {
+  const YEAR = "(19[0-9][0-9]|20[0-4][0-9]|2050)";
+  const DD_MM_31 = "(0[1-9]|[12][0-9]|30|31)/(0[13578]|1[02])";
+  const DD_MM_30 = "(0[1-9]|[12][0-9]|30)/(0[469]|11)";
+  const DD_FEB = "(0[1-9]|1[0-9]|2[0-8])/02";
+  const LEAP_YEARS =
+    "(1904|1908|1912|1920|1924|1928|1932|1936|1940|1944" +
+    "|1948|1952|1956|1960|1964|1968|1972|1976|1980" +
+    "|1984|1988|1992|1996|2000|2004|2008|2012|2016" +
+    "|2020|2024|2028|2032|2036|2040|2044|2048)";
+  const DD_FEB_LEAP_YEAR = `(0[1-9]|[12][0-9])/02/${LEAP_YEARS}`;
+  const dateRegExp = new RegExp(
+    `^(${DD_FEB_LEAP_YEAR}|(${DD_MM_31}|${DD_MM_30}|${DD_FEB})/${YEAR})$`
+  );
+  return function isValidDate(date) {
+    return dateRegExp.test(date.trim());
+  };
+})();
+
+function timedRun(fun, count = 10_000_000) {
+  const start = Date.now();
+  for (let i = 0; i < count; i += 1) {
+    fun();
+  }
+  return (Date.now() - start) / 1000;
+}
