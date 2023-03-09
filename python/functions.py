@@ -314,3 +314,154 @@ def flatten(lst: list) -> list:
     do_flatten(lst, 0, ret_list)
     return ret_list 
 #:
+
+#####################################################
+# 
+#       FUNÇÕES INTERNAS: CLOSURES
+#
+#####################################################
+
+# def verde(Z):
+#     X = ...    # definir X
+#     def vermelha(...):
+#         Y = ...
+#         # tem acesso a X e a Y e a Z
+#         ...
+#     ...
+#     # tem acesso apenas X 
+#     return vermelha 
+#
+#         ┌─────────────────────────────────┐
+#         │              ┌───────────────┐  │
+#         │              │               │  │
+#         │  VERMELHA    │     VERDE     │  │
+#         │              │               │  │
+#         │              └───────────────┘  │
+#         └─────────────────────────────────┘
+
+def somador(x: int):
+    def soma(y: int):
+        return x + y
+    return soma
+
+def somador(x: int):
+    return lambda y: x + y
+
+somaA = somador(10)
+somaA(1)    # 11
+somaA(10)   # 20
+
+def counter(start = 0):
+    i = start - 1
+    def count():
+        nonlocal i
+        i += 1
+        return i
+    return count
+#:
+
+#########################
+
+months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+]
+
+def month_name(month_num: int) -> str:
+    return months[month_num - 1]
+#:
+
+def month_name(month_num: int) -> str:
+    months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+]
+    return months[month_num - 1]
+#:
+
+def _make_month_name():
+    months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ]
+
+    return lambda month_num: months[month_num - 1]
+
+month_name = _make_month_name()
+
+########################
+
+import re
+import time
+
+def is_valid_date(date: str) -> bool:
+    YEAR       = '(19[0-9][0-9]|20[0-4][0-9]|2050)';
+    DD_MM_31   = '(0[1-9]|[12][0-9]|30|31)/(0[13578]|1[02])';
+    DD_MM_30   = '(0[1-9]|[12][0-9]|30)/(0[469]|11)';
+    DD_FEB     = '(0[1-9]|1[0-9]|2[0-8])/02';
+    LEAP_YEARS = ('(1904|1908|1912|1920|1924|1928|1932|1936|1940|1944'
+                    '|1948|1952|1956|1960|1964|1968|1972|1976|1980'
+                    '|1984|1988|1992|1996|2000|2004|2008|2012|2016'
+                    '|2020|2024|2028|2032|2036|2040|2044|2048)' )
+    DD_FEB_LEAP_YEAR = f'(0[1-9]|[12][0-9])/02/{LEAP_YEARS}';
+    date_reg_exp = re.compile(
+        rf'^({DD_FEB_LEAP_YEAR}|({DD_MM_31}|{DD_MM_30}|{DD_FEB})/{YEAR})$'
+    )
+    return bool(date_reg_exp.match(date.strip()))
+#:
+
+def _make_is_valid_date(date: str) -> bool:
+    YEAR       = '(19[0-9][0-9]|20[0-4][0-9]|2050)';
+    DD_MM_31   = '(0[1-9]|[12][0-9]|30|31)/(0[13578]|1[02])';
+    DD_MM_30   = '(0[1-9]|[12][0-9]|30)/(0[469]|11)';
+    DD_FEB     = '(0[1-9]|1[0-9]|2[0-8])/02';
+    LEAP_YEARS = ('(1904|1908|1912|1920|1924|1928|1932|1936|1940|1944'
+                    '|1948|1952|1956|1960|1964|1968|1972|1976|1980'
+                    '|1984|1988|1992|1996|2000|2004|2008|2012|2016'
+                    '|2020|2024|2028|2032|2036|2040|2044|2048)' )
+    DD_FEB_LEAP_YEAR = f'(0[1-9]|[12][0-9])/02/{LEAP_YEARS}';
+    date_reg_exp = re.compile(
+        rf'^({DD_FEB_LEAP_YEAR}|({DD_MM_31}|{DD_MM_30}|{DD_FEB})/{YEAR})$'
+    )
+    return lambda date: bool(date_reg_exp.match(date.strip()))
+#:
+
+is_valid_date = _make_is_valid_date()
+    
+def timed_run(fun, count = 10_000_000):
+    start  = time.time()
+    for _ in range(count):
+        fun()
+    return int(time.time() - start)
+#:
+
