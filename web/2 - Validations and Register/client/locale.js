@@ -118,7 +118,7 @@ function translateMessage() {
 function setCurrentLanguage({ target }) {
   const circleElement = target.closest("div");
   currentLanguage = currentLanguage === "en_US" ? "pt_PT" : "en_US";
-  if (!Object.keys(userMessages).some((key) => key === currentLanguage)) {
+  if (!userMessages[currentLanguage]) {
     throw new UnknownLanguage("Unknown language.");
   }
   circleElement.classList.toggle("in-action");
@@ -127,7 +127,7 @@ function setCurrentLanguage({ target }) {
 }
 
 function tr(messageID, responseData, isTournament) {
-  if (!messageID.startsWith("ERR") && !messageID.startsWith("SUC")) {
+  if (!userMessages[currentLanguage][messageID]) {
     throw new UnknownMessageID("Unknown message id.");
   }
   [currentMessageId, currentResData] = [messageID, responseData];
@@ -157,10 +157,10 @@ function createMessage(messageID, responseData, isTournament) {
 }
 
 const trDoc = (function () {
-  const trDocRe = /{{(tr|TR)\s{1}([A-Z]+(_)?)+}}/;
-  let trCode;
+  const trDocRe = /{{tr\s([A-Z_]+)\s?}}/;
   return function trDocs(ancestorNode) {
     const allElements = ancestorNode.querySelectorAll("*");
+    let trcode;
     allElements.forEach((element) => {
       const codeFromDataAttr = element.dataset.trcode;
       if (codeFromDataAttr) {
@@ -171,26 +171,19 @@ const trDoc = (function () {
               userMessages[currentLanguage][codeFromDataAttr]);
         return;
       }
-      const rejectableElements = ["DIV", "FORM", "SELECT", "MAIN", "SPAN"];
-      if (rejectableElements.some((el) => el === element.nodeName)) {
+      if (
+        ["DIV", "MAIN", "SPAN", "FORM", "SELECT", "I"].includes(
+          element.nodeName
+        )
+      ) {
         return;
       }
-      try {
-        element.placeholder &&= userMessages[currentLanguage][trCode];
-        element.placeholder && element.setAttribute("data-trcode", trCode);
-        const data = element.innerText && element.innerText.match(trDocRe);
-        const partialCode = data && data[0];
-        trCode =
-          partialCode &&
-          partialCode.trim().substring(5, partialCode.length - 2);
-      } catch (err) {
-        alert("Something went wrong.");
-        console.error(err.message);
-      }
-      if (trCode) {
-        element.setAttribute("data-trcode", trCode);
-        element.innerText = userMessages[currentLanguage][trCode];
-      }
+      element.innerHTML = element.innerHTML.replace(trDocRe, (match, c1) => {
+        trcode = c1;
+        return userMessages[currentLanguage][c1];
+      });
+      element.placeholder &&= userMessages[currentLanguage][trcode];
+      trcode && element.setAttribute("data-trcode", trcode);
     });
   };
-})(currentLanguage);
+})();

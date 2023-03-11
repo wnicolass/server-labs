@@ -96,7 +96,7 @@ async function registerTournament() {
 }
 
 async function validateAndSubmitForm() {
-  if (!validateAllFields) {
+  if (!validateAllFields()) {
     return;
   }
 
