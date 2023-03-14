@@ -1,11 +1,43 @@
 
+from datetime import date
+from random import randrange
 from typing import List
-from data.models import Testimonial
-
+from data.models import Testimonial, Student
+from common import (
+    is_valid_email,
+    find_in
+)
+_students = []
 
 def student_count() -> int:
     return 2315
 #:
+
+def create_account(
+    name: str,
+    email: str,
+    password: str,
+    birth_date: date
+):
+    student = Student(
+        randrange(10_000, 100_000),
+        name,
+        email,
+        hash_password(password),
+        birth_date
+    )
+    _students.append(student)
+    return student
+
+def get_student_by_email(email: str) -> Student | None:
+    if not is_valid_email(email):
+        raise ValueError(f'Invalid email address: {email}')
+    print(_students)
+    return (find_in(_students, lambda student: student.email == email))
+#:
+
+def hash_password(password: str) -> str:
+    return password + '-hashpw'
 
 def get_testimonials(count: int) -> List[Testimonial]:
     return [
