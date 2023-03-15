@@ -6,40 +6,45 @@
             <div class="breadcrumbs" >
             </div><!-- End Breadcrumbs -->
 
+            <!-- ======= Course not found ======= -->
+            <section tal:condition="error"  id="course-details" class="course-details">
+                <div class="d-flex justify-content-center form-outline mb-4 error-msg">${error_msg}</div>
+            </section>
+
             <!-- ======= Cource Details Section ======= -->
             <section id="course-details" class="course-details">
                 <div class="container" data-aos="fade-up">
 
                     <div class="row">
                         <div class="col-lg-8">
-                            <img src="/static/assets/img/courses/course-${id}-details.jpg" class="img-fluid" alt="">
-                            <h3>${name}</h3>
+                            <img src="/static/assets/img/courses/course-${course.id}-details.jpg" class="img-fluid" alt="">
+                            <h3>${course.name}</h3>
                             <p>
-                            ${description}
+                            ${course.description}
                             </p>
                         </div>
                         <div class="col-lg-4">
 
                             <div class="course-info d-flex justify-content-between align-items-center">
                                 <h5>Formador</h5>
-                                <p><a href="#">${trainer_name}</a></p>
+                                <p><a href="#">${course.trainer_name}</a></p>
                             </div>
 
                             <div class="course-info d-flex justify-content-between align-items-center">
                                 <h5>Preço</h5>
-                                <p>${price}€</p>
+                                <p>${course.price}€</p>
                             </div>
 
                             <div class="course-info d-flex justify-content-between align-items-center">
                                 <h5>Lugares Disponíveis</h5>
-                                <p>${available_seats}</p>
+                                <p>${course.available_seats}</p>
                             </div>
 
                             <div class="course-info d-flex justify-content-between align-items-center">
                                 <h5>Horário</h5>
-                                <p>${schedule}</p>
+                                <p>${course.schedule}</p>
                             </div>
-                            <div class="course-info d-flex justify-content-between align-items-center">
+                            <div tal:condition='is_logged_in' class="course-info d-flex justify-content-between align-items-center">
                                 <button class="get-started-btn">Inscrever</button>
                             </div>
                         </div>

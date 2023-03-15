@@ -7,7 +7,7 @@
     <div class="container position-relative" data-aos="zoom-in" data-aos-delay="100">
       <h1>Aprenda Hoje,<br>Aprenda Amanhã</h1>
       <h2>Venha aprender connosco</h2>
-      <a href="courses.html" class="btn-get-started">Registo Gratuito</a>
+      <a href="/account/register" class="btn-get-started">Registo Gratuito</a>
     </div>
   </section><!-- End Hero -->
 
