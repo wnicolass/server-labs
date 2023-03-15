@@ -3,7 +3,7 @@ from datetime import date
 from random import randrange
 from typing import List
 from data.models import Testimonial, Student
-from common import (
+from common.common import (
     is_valid_email,
     find_in
 )
@@ -35,6 +35,14 @@ def get_student_by_email(email: str) -> Student | None:
     print(_students)
     return (find_in(_students, lambda student: student.email == email))
 #:
+
+def authenticate_student_by_email(email: str, password: str) -> Student | None:
+    if not is_valid_email(email):
+        raise ValueError(f'Invalid email address: {email}')
+    if student := get_student_by_email(email):
+        if hash_password(password) == student.password:
+            return student
+    return None
 
 def hash_password(password: str) -> str:
     return password + '-hashpw'
