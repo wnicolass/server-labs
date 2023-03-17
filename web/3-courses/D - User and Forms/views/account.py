@@ -20,10 +20,9 @@ router = APIRouter()
 MIN_DATE = date.fromisoformat('1920-01-01')
 
 @router.get('/account')
-async def index():
-    return {
-
-    }
+@template()
+async def my_account():
+    return ViewModel()
 #:
 
 @router.get('/account/register')
