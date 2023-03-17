@@ -143,13 +143,41 @@ async def logout():
 
 @router.get('/account')
 @template()
-async def my_account():
+async def my_account() -> ViewModel:
     return my_account_viewmodel()
 #:
 
-def my_account_viewmodel():
+def my_account_viewmodel() -> ViewModel:
+    student = student_service.get_current_student()
     return ViewModel(
-        user = student_service.get_current_student()
+        name = student.name,
+        email = student.email
     )
 #:
 
+@router.post('/account/update')
+@template(template_file = 'account/my_account.pt')
+async def update_user(request: Request) -> ViewModel:
+    vm = await update_user_viewmodel(request)
+    
+    return vm
+
+async def update_user_viewmodel(request: Request) -> ViewModel:
+    form_data = await request.form()
+    current_user = student_service.get_current_student()
+    vm = ViewModel(
+        id = current_user.id,
+        name = current_user.name,
+        email = form_field_as_str(form_data, 'email'),
+        password = form_field_as_str(form_data, 'password'),
+        new_password = form_field_as_str(form_data, 'new-password'),
+        repeat_password = form_field_as_str(form_data, 'repeat-password')
+    )
+    if not vm.password or not is_valid_password(vm.password):
+        vm.error, vm.error_msg = True, 'Password inválida.'
+    elif vm.new_password == vm.repeat_password or vm.email and is_valid_email(vm.email):
+        if student_service.hash_password(vm.password) == current_user.password:
+            student_service.update_student(vm)
+    else:
+        vm.error, vm.error_msg = True, 'Informações inválidas. Por favor, confira os dados fornecidos.'
+    return vm
