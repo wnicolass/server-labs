@@ -7,6 +7,7 @@ from common.common import (
     is_valid_email,
     find_in
 )
+from common.viewmodels import ViewModel
 _students = []
 
 def student_count() -> int:
@@ -32,8 +33,11 @@ def create_account(
 def get_student_by_email(email: str) -> Student | None:
     if not is_valid_email(email):
         raise ValueError(f'Invalid email address: {email}')
-    print(_students)
     return (find_in(_students, lambda student: student.email == email))
+#:
+
+def get_current_student() -> Student | None:
+    return (find_in(_students, lambda student: student.id == ViewModel().user_id))
 #:
 
 def authenticate_student_by_email(email: str, password: str) -> Student | None:

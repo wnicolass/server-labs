@@ -13,17 +13,11 @@ from common.fastapi_utils import (
     form_field_as_str,
     form_field_as_file
 )
-from common.auth import set_auth_cookie, delete_auth_cookie
+from common.auth import set_auth_cookie, delete_auth_cookie, get_auth_from_cookie
 
 router = APIRouter()
 
 MIN_DATE = date.fromisoformat('1920-01-01')
-
-@router.get('/account')
-@template()
-async def my_account():
-    return ViewModel()
-#:
 
 @router.get('/account/register')
 @template()
@@ -146,4 +140,16 @@ async def logout():
     response = responses.RedirectResponse(url = '/', status_code = status.HTTP_302_FOUND)
     delete_auth_cookie(response)
     return response
+
+@router.get('/account')
+@template()
+async def my_account():
+    return my_account_viewmodel()
+#:
+
+def my_account_viewmodel():
+    return ViewModel(
+        user = student_service.get_current_student()
+    )
+#:
 
