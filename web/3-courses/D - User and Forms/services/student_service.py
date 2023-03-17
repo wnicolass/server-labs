@@ -5,6 +5,7 @@ from typing import List
 from data.models import Testimonial, Student
 from common.common import (
     is_valid_email,
+    is_valid_password,
     find_in
 )
 from common.viewmodels import ViewModel
@@ -44,7 +45,8 @@ def update_student(new_data: ViewModel) -> Student | None:
     for student in _students:
         if student.id == new_data.id:
             student.email = new_data.email
-            student.password = new_data.new_password is not None
+            if is_valid_password(new_data.password) and new_data.password == new_data.repeat_password:
+                student.password = new_data.password
 
 def authenticate_student_by_email(email: str, password: str) -> Student | None:
     if not is_valid_email(email):

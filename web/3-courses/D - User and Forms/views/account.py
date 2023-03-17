@@ -173,11 +173,13 @@ async def update_user_viewmodel(request: Request) -> ViewModel:
         new_password = form_field_as_str(form_data, 'new-password'),
         repeat_password = form_field_as_str(form_data, 'repeat-password')
     )
-    if not vm.password or not is_valid_password(vm.password):
+    if not is_valid_password(vm.password):
         vm.error, vm.error_msg = True, 'Password inválida.'
-    elif vm.new_password == vm.repeat_password or vm.email and is_valid_email(vm.email):
+    elif is_valid_email(vm.email):
         if student_service.hash_password(vm.password) == current_user.password:
             student_service.update_student(vm)
+    elif vm.new_password != vm.repeat_password:
+        print('Senhas não correspondem.')
     else:
         vm.error, vm.error_msg = True, 'Informações inválidas. Por favor, confira os dados fornecidos.'
     return vm
