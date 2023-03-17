@@ -40,6 +40,12 @@ def get_current_student() -> Student | None:
     return (find_in(_students, lambda student: student.id == ViewModel().user_id))
 #:
 
+def update_student(new_data: ViewModel) -> Student | None:
+    for student in _students:
+        if student.id == new_data.id:
+            student.email = new_data.email
+            student.password = new_data.new_password is not None
+
 def authenticate_student_by_email(email: str, password: str) -> Student | None:
     if not is_valid_email(email):
         raise ValueError(f'Invalid email address: {email}')
