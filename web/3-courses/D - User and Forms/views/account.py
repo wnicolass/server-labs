@@ -165,6 +165,7 @@ async def update_user(request: Request) -> ViewModel:
 async def update_user_viewmodel(request: Request) -> ViewModel:
     form_data = await request.form()
     current_user = student_service.get_current_student()
+    print(current_user)
     vm = ViewModel(
         id = current_user.id,
         name = current_user.name,
@@ -173,13 +174,19 @@ async def update_user_viewmodel(request: Request) -> ViewModel:
         new_password = form_field_as_str(form_data, 'new-password'),
         repeat_password = form_field_as_str(form_data, 'repeat-password')
     )
-    if not is_valid_password(vm.password):
+
+    if not student_service.hash_password(vm.password) == current_user.password:
         vm.error, vm.error_msg = True, 'Password inválida.'
-    elif is_valid_email(vm.email):
-        if student_service.hash_password(vm.password) == current_user.password:
-            student_service.update_student(vm)
-    elif vm.new_password != vm.repeat_password:
-        print('Senhas não correspondem.')
+    elif not is_valid_email(vm.email):
+        vm.error, vm.error_msg = True, 'Email inválido.'
+    elif vm.email != current_user.email or is_valid_password(vm.new_password):
+        if not vm.new_password:
+            student_service.update_student(vm, False)
+        elif vm.new_password == vm.repeat_password:
+            student_service.update_student(vm, True)
+        else:
+            vm.error, vm.error_msg = True, 'Senhas não correspondem.'
     else:
-        vm.error, vm.error_msg = True, 'Informações inválidas. Por favor, confira os dados fornecidos.'
+        vm.error, vm.error_msg = True, 'Nenhuma informação alterada.'
+        
     return vm
