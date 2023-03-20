@@ -3,8 +3,11 @@ all = (
     'hash_password'
 )
 
-from fastapi import Response, Request
+from fastapi import HTTPException, Response, Request, status
 from hashlib import sha512
+from data.models import Student
+from common.fastapi_utils import global_request
+from services import student_service
 
 AUTH_COOKIE_NAME = 'user_id'
 SESSION_COOKIE_MAX_AGE = 84600_00
@@ -21,6 +24,27 @@ def set_auth_cookie(response: Response, user_id: int):
         max_age = SESSION_COOKIE_MAX_AGE,
     )
 #:
+
+def get_current_user() -> Student | None:
+    if student_id := get_auth_from_cookie(global_request.get()):
+        return student_service.get_student_by_id(student_id)
+    return None
+#:
+
+def requires_unauthentication():
+    if get_current_user():
+        raise HTTPUnauthenticatedOnly(detail = 'This area requires unauthenticatiion')
+    
+def requires_authentication():
+    if not get_current_user():
+        raise HTTPUnauthorizedAccess(detail = 'This area requires authenticatiion')
+    
+class HTTPUnauthorizedAccess(HTTPException):
+    def __init__(self, *args, **kwargs):
+        super().__init__(status_code = status.HTTP_401_UNAUTHORIZED, *args, **kwargs)
+
+class HTTPUnauthenticatedOnly(HTTPUnauthorizedAccess):
+    pass
 
 def delete_auth_cookie(response: Response):
     response.delete_cookie(AUTH_COOKIE_NAME)

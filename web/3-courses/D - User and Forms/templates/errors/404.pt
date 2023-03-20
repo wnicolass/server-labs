@@ -1,0 +1,28 @@
+<div metal:use-macro="load: ../shared/_layout.pt">
+    <div metal:fill-slot="content" tal:omit-tag="True">
+
+        <main id="main">
+            <!-- ======= Breadcrumbs ======= -->
+            <div class="breadcrumbs" data-aos="fade-in">
+              <div class="container">
+                <h1>404</h1>
+            </div><!-- End Breadcrumbs -->
+        
+            <!-- ======= About Section ======= -->
+            <section id="about" class="about">
+              <div class="container" data-aos="fade-up">
+                <div class="row">
+                    <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content">
+                        <h3>Tentou aceder a uma zona inexistente. Porque não tenta?</h3>
+                        <ul>
+                            <li><i class="bi bi-check-circle"></i><a href="/account/register">Sign Up</a></li>
+                            <li><i class="bi bi-check-circle"></i><a href="/account/login">Sign In</a></li>
+                        </ul>
+                    </div>
+                </div>
+              </div>
+            </section><!-- End Testimonials Section -->
+          </main><!-- End #main -->
+        
+    </div>
+</div>

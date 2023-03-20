@@ -8,7 +8,6 @@ from common.common import (
     is_valid_password,
     find_in
 )
-from common.viewmodels import ViewModel
 _students = []
 
 def student_count() -> int:
@@ -37,16 +36,28 @@ def get_student_by_email(email: str) -> Student | None:
     return (find_in(_students, lambda student: student.email == email))
 #:
 
-def get_current_student() -> Student | None:
-    return (find_in(_students, lambda student: student.id == ViewModel().user_id))
+def get_student_by_id(student_id: int) -> Student | None:
+    return find_in(_students, lambda student: student.id == student_id)
 #:
 
-def update_student(new_data: ViewModel, update_pass: bool) -> Student | None:
-    for student in _students:
-        if student.id == new_data.id:
-            student.email = new_data.email
-            if update_pass:
-                student.password = hash_password(new_data.new_password)
+def password_matches(student: Student, password: str) -> bool:
+    return student.password == hash_password(password)
+#:
+
+def update_account(
+        id: int,
+        current_password: str,
+        email: str | None = None,
+        new_password: str | None = None,
+) -> Student:
+    if not (student := get_student_by_id(id)):
+        raise ValueError(f'Invalid id {id}.')
+    if not password_matches(student, current_password):
+        raise ValueError(f"Password doesn't match.")
+    student.email = email if email else student.email
+    student.password = hash_password(new_password) if new_password else student.password
+    return student
+#:
 
 def authenticate_student_by_email(email: str, password: str) -> Student | None:
     if not is_valid_email(email):

@@ -5,11 +5,12 @@ __all__ = (
 from datetime import date
 from typing import Any
 from common.fastapi_utils import global_request
-from common.auth import get_auth_from_cookie
+from common.auth import get_current_user
 
 class ViewModel(dict):
     def __init__(self, *args, **kargs):
-        user_id = get_auth_from_cookie(global_request.get())
+        user = get_current_user()
+        user_id = user.id if user else None
         all = {
             'error': None,
             'error_msg': None,

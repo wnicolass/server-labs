@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Request, responses, status   
+from fastapi import APIRouter, Depends, Request, responses, status   
 from fastapi_chameleon import template
 from services import student_service
 from common.common import (
@@ -13,13 +13,19 @@ from common.fastapi_utils import (
     form_field_as_str,
     form_field_as_file
 )
-from common.auth import set_auth_cookie, delete_auth_cookie, get_auth_from_cookie
+from common.auth import (
+    set_auth_cookie,
+    delete_auth_cookie,
+    requires_authentication,
+    requires_unauthentication,
+    get_current_user
+)
 
 router = APIRouter()
 
 MIN_DATE = date.fromisoformat('1920-01-01')
 
-@router.get('/account/register')
+@router.get('/account/register', dependencies = [Depends(requires_unauthentication),])
 @template()
 async def register():
     return register_viewmodel()
@@ -38,7 +44,7 @@ def register_viewmodel():
     
 #:
 
-@router.post('/account/register', response_model = None)
+@router.post('/account/register', response_model = None, dependencies = [Depends(requires_unauthentication),])
 @template(template_file = 'account/register.pt')
 async def register(request: Request) -> dict | responses.Response:
     vm = await post_register_viewmodel(request)
@@ -91,7 +97,7 @@ async def post_register_viewmodel(request: Request):
     return vm
 #:
 
-@router.get('/account/login')                            # type: ignore
+@router.get('/account/login', dependencies = [Depends(requires_unauthentication),])                            # type: ignore
 @template()
 async def login():
     return login_viewmodel()
@@ -103,7 +109,7 @@ def login_viewmodel():
         password = '',
     )
 
-@router.post('/account/login')
+@router.post('/account/login', dependencies = [Depends(requires_unauthentication),])
 @template(template_file = 'account/login.pt')
 async def post_login(request: Request):
     vm = await post_login_viewmodel(request)
@@ -135,58 +141,70 @@ async def post_login_viewmodel(request: Request) -> ViewModel:
 
     return vm
 
-@router.get('/account/logout')
+@router.get('/account/logout', dependencies = [Depends(requires_authentication),])
 async def logout():
     response = responses.RedirectResponse(url = '/', status_code = status.HTTP_302_FOUND)
     delete_auth_cookie(response)
     return response
 
-@router.get('/account')
+@router.get('/account', dependencies = [Depends(requires_authentication),])
 @template()
 async def my_account() -> ViewModel:
     return my_account_viewmodel()
 #:
 
 def my_account_viewmodel() -> ViewModel:
-    student = student_service.get_current_student()
+    student = get_current_user()
     return ViewModel(
         name = student.name,
         email = student.email
     )
 #:
 
-@router.post('/account/update')
+@router.post('/account/update', dependencies = [Depends(requires_authentication),])
 @template(template_file = 'account/my_account.pt')
 async def update_user(request: Request) -> ViewModel:
-    vm = await update_user_viewmodel(request)
+    vm = await update_account_viewmodel(request)
     
     return vm
 
-async def update_user_viewmodel(request: Request) -> ViewModel:
-    form_data = await request.form()
-    current_user = student_service.get_current_student()
-    print(current_user)
-    vm = ViewModel(
-        id = current_user.id,
-        name = current_user.name,
-        email = form_field_as_str(form_data, 'email'),
-        password = form_field_as_str(form_data, 'password'),
-        new_password = form_field_as_str(form_data, 'new-password'),
-        repeat_password = form_field_as_str(form_data, 'repeat-password')
-    )
+async def update_account_viewmodel(request: Request):
+    student = get_current_user()
+    assert student is not None
 
-    if not student_service.hash_password(vm.password) == current_user.password:
-        vm.error, vm.error_msg = True, 'Password inválida.'
-    elif not is_valid_email(vm.email):
-        vm.error, vm.error_msg = True, 'Email inválido.'
-    elif vm.email != current_user.email or is_valid_password(vm.new_password):
-        if not vm.new_password:
-            student_service.update_student(vm, False)
-        elif vm.new_password == vm.repeat_password:
-            student_service.update_student(vm, True)
-        else:
-            vm.error, vm.error_msg = True, 'Senhas não correspondem.'
-    else:
-        vm.error, vm.error_msg = True, 'Nenhuma informação alterada.'
-        
+    form_data = await request.form()
+
+    vm = ViewModel()
+    vm.error_msg = ''
+    vm.name = student.name
+    vm.email = form_field_as_str(form_data, 'email').strip()
+    current_password = form_field_as_str(form_data, 'current_password').strip()
+    new_email = None if vm.email == student.email else vm.email
+    new_password = form_field_as_str(form_data, 'new_password').strip()
+
+    if not student_service.password_matches(student, current_password):
+        vm.error_msg = 'Senha inválida!'
+    #:
+    elif new_email:
+        if not is_valid_email(new_email):
+            vm.error_msg = f'Endereço de email {new_email} inválido!'
+        elif student_service.get_student_by_email(new_email):
+            vm.error_msg = f'Endereço de email {new_email} já existe!'
+    #:
+    elif student_service.password_matches(student, new_password):
+        vm.error_msg = 'Nova senha é igual à anterior!'
+    #:
+    elif not is_valid_password(new_password):
+        vm.error_msg = 'Senha inválida!'
+    #:
+
+    vm.error = bool(vm.error_msg)
+    if not vm.error:
+        student_service.update_account(
+            student.id, 
+            current_password, 
+            new_email, 
+            new_password,
+        )
+
     return vm
